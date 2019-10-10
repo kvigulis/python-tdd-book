@@ -88,7 +88,7 @@ class NewVisitorTest(LiveServerTestCase):
 
 		# She notices that her list has a unique URL
 		boatcow_list_url = self.browser.current_url
-		self.asserRegex(boatcow_list_url, '/lists/.+')
+		self.assertRegex(boatcow_list_url, '/lists/.+')
 
 		# Now a new user, Peepeepoopoo, comes along to the site.
 

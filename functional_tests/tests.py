@@ -9,17 +9,17 @@ import time
 
 if platform == "linux":
 	# Linux chrome driver
-	broser_driver_path = './chromedriver'
+	browser_driver_path = './chromedriver'
 else:
 	# Windows Chrome driver
-	broser_driver_path = './chromedriver.exe'
+	browser_driver_path = './chromedriver.exe'
 
-MAX_WAIT = 10 	
+MAX_WAIT = 4 	
 
 class NewVisitorTest(LiveServerTestCase):
 
 	def setUp(self):
-		self.browser = webdriver.Chrome(broser_driver_path)
+		self.browser = webdriver.Chrome(browser_driver_path)
 
 	def tearDown(self):
 		self.browser.quit()
@@ -37,7 +37,7 @@ class NewVisitorTest(LiveServerTestCase):
 					raise e
 				time.sleep(0.5)
 
-	def test_can_start_a_list_and_retrieve_it_later(self):
+	def test_can_start_a_list_for_one_user(self):
 		# Boatcow has heard about a cool new online to-do app. She goes 
 		# to check out its homepage.
 		self.browser.get(self.live_server_url)
@@ -65,12 +65,61 @@ class NewVisitorTest(LiveServerTestCase):
 		inputbox.send_keys(Keys.ENTER)
 
 		# The page updates again, and now shows both items on her list
-		self.wait_for_row_in_list_table('1: Nod my head')
 		self.wait_for_row_in_list_table('2: Ask for food')
+		self.wait_for_row_in_list_table('1: Nod my head')
 
-		# Boatcow wonder wehter the site will remember her list. The she sees
+		# Satisfied, she goes back to the boat.
+		
+
+		# Boatcow wonders wehter the site will remember her list. The she sees
 		# that the site has generated a unique URL for her -- there is some 
 		# explanatory text to that effect
-		self.fail("Finish the test!")
-
 		# Boatcow visits that URL - her to-do list is still there.
+
+		
+
+	def test_multiple_users_can_start_lists_at_different_urls(self):
+		# Boatcow starts a new to-do list
+		self.browser.get(self.live_server_url)
+		inputbox = self.browser.find_element_by_id('id_new_item')
+		inputbox.send_keys('Nod my head')
+		inputbox.send_keys(Keys.ENTER)
+		self.wait_for_row_in_list_table('1: Nod my head')
+
+		# She notices that her list has a unique URL
+		boatcow_list_url = self.browser.current_url
+		self.asserRegex(boatcow_list_url, '/lists/.+')
+
+		# Now a new user, Peepeepoopoo, comes along to the site.
+
+		## We use a new browser session to make sure that no information 
+		## of Boatcow's is coming through from cookies etc
+		self.browser.quit()
+		self.browser = webdriver.Chrome(browser_driver_path)
+
+		# Peepeepoopoo visits the home page. There is no sign of Boatcow's list
+		self.browser.get(self.live_server_url)
+		page_text = self.browser.find_element_by_tag_name('body').text
+		self.assertNotIn('Nod my head', page_text)
+		self.assertNotIn('Ask for food', page_text)
+
+		# Peepeepoopoo starts a new list by entering a new item. He 
+		# is less orthodox than Boatcow...
+		inputbox = self.browser.find_element_by_id('id_new_item')
+		inputbox.send_keys('Dig a hole in the yard')
+		inputbox.send_keys(Keys.ENTER)
+		self.wait_for_row_in_list_table('1. Dig a hole in the yard')
+
+		# Peepeepoopoo gets his own unique URL
+		peepeepoopoo_list_url = self.browser.current_url
+		self.asserRegex(peepeepoopoo_list_url, 'lists/.+')
+		self.asserNotEqual(peepeepoopoo_list_url, boatcow_list_url)
+
+		# Again, there is no trace of Boatcow's list
+		page_text = self.browser.find_element_by_tag_name('body').text
+		self.assertNotIn('Nod my head', page_text)
+		self.assertIn('Dig a hole in the yard', page_text)
+
+		# Satisifed the return to thier duty.
+
+

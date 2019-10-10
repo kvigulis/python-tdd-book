@@ -112,8 +112,8 @@ class NewVisitorTest(LiveServerTestCase):
 
 		# Peepeepoopoo gets his own unique URL
 		peepeepoopoo_list_url = self.browser.current_url
-		self.asserRegex(peepeepoopoo_list_url, 'lists/.+')
-		self.asserNotEqual(peepeepoopoo_list_url, boatcow_list_url)
+		self.assertRegex(peepeepoopoo_list_url, 'lists/.+')
+		self.assertNotEqual(peepeepoopoo_list_url, boatcow_list_url)
 
 		# Again, there is no trace of Boatcow's list
 		page_text = self.browser.find_element_by_tag_name('body').text

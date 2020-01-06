@@ -11,11 +11,14 @@ import time
 if platform == "linux":
 	# Linux chrome driver
 	browser_driver_path = './chromedriver'
+if platform == "darwin":
+	# Mac chrome driver
+	browser_driver_path = './chromedriver_mac'
 else:
 	# Windows Chrome driver
 	browser_driver_path = './chromedriver.exe'
 
-MAX_WAIT = 4 	
+MAX_WAIT = 4
 
 class NewVisitorTest(StaticLiveServerTestCase):
 
@@ -42,26 +45,26 @@ class NewVisitorTest(StaticLiveServerTestCase):
 				time.sleep(0.5)
 
 	def test_can_start_a_list_for_one_user(self):
-		# Boatcow has heard about a cool new online to-do app. She goes 
+		# Boatcow has heard about a cool new online to-do app. She goes
 		# to check out its homepage.
 		self.browser.get(self.live_server_url)
 
 		# She notices the page title and header mention to-do lists
 		self.assertIn('To-Do', self.browser.title)
 		header_text = self.browser.find_element_by_tag_name('h1').text
-		self.assertIn('To-Do', header_text)		
+		self.assertIn('To-Do', header_text)
 
 		# She is invited to enter a to-do item straight away
 		inputbox = self.browser.find_element_by_id('id_new_item')
 		self.assertEqual(inputbox.get_attribute('placeholder'), 'Enter a to-do item')
 
-		# Boatcow types "Nod my head" into a text box 
+		# Boatcow types "Nod my head" into a text box
 		inputbox.send_keys('Nod my head')
 
 		# When she hits enter, the page updates, and now the page lists '1: Nod my head' as an item in a to-do list table
 		inputbox.send_keys(Keys.ENTER)
 		self.wait_for_row_in_list_table('1: Nod my head')
-		
+
 
 		# There is still a text box inviting Boatcow to add another item. She enters 'Ask for food'
 		inputbox = self.browser.find_element_by_id('id_new_item')
@@ -73,14 +76,14 @@ class NewVisitorTest(StaticLiveServerTestCase):
 		self.wait_for_row_in_list_table('1: Nod my head')
 
 		# Satisfied, she goes back to the boat.
-		
+
 
 		# Boatcow wonders wehter the site will remember her list. The she sees
-		# that the site has generated a unique URL for her -- there is some 
+		# that the site has generated a unique URL for her -- there is some
 		# explanatory text to that effect
 		# Boatcow visits that URL - her to-do list is still there.
 
-		
+
 
 	def test_multiple_users_can_start_lists_at_different_urls(self):
 		# Boatcow starts a new to-do list
@@ -96,7 +99,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
 
 		# Now a new user, Peepeepoopoo, comes along to the site.
 
-		## We use a new browser session to make sure that no information 
+		## We use a new browser session to make sure that no information
 		## of Boatcow's is coming through from cookies etc
 		self.browser.quit()
 		self.browser = webdriver.Chrome(browser_driver_path)
@@ -107,7 +110,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
 		self.assertNotIn('Nod my head', page_text)
 		self.assertNotIn('Ask for food', page_text)
 
-		# Peepeepoopoo starts a new list by entering a new item. He 
+		# Peepeepoopoo starts a new list by entering a new item. He
 		# is less orthodox than Boatcow...
 		inputbox = self.browser.find_element_by_id('id_new_item')
 		inputbox.send_keys('Dig a hole in the yard')
@@ -140,7 +143,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
 		)
 
 		# She starts a new list and sees the input is nicely
-		# centered there too 
+		# centered there too
 		inputbox.send_keys('testing')
 		inputbox.send_keys(Keys.ENTER)
 		self.wait_for_row_in_list_table('1: testing')
